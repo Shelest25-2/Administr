@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Проверка аргументов
-if [ $# -ne 2 ]; then
-    echo "Использование: $0 <имя_файла> <время_в_секундах>"
+# Не хочу чтобы можно было дописать строчки в файлики с заданием
+if [ $# -ne 2 ] || [[ "$1" =~ ^[1-8]\.sh$ ]]; then
+    echo "Использование: $0 <имя_файла_для_записи> <время_в_секундах>"
     exit 1
 fi
 
@@ -16,7 +17,7 @@ while [ $SECONDS -lt $end_time ]; do
     timestamp=$(date "+[%d.%m.%y %H:%M]")
     
     # Читаем среднюю нагрузку
-    load=$(cat /proc/loadavg | awk '{print $1, $2, $3}')
+    load=$(awk '{print $1, $2, $3}' /proc/loadavg)
     
     # Записываем в файл
     echo "$timestamp = $load" >> "$output_file"
