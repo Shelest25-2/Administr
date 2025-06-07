@@ -1,0 +1,78 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t my-app .
+      - name: Run tests
+        run: |
+          docker run --network host \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            -e DB_USER=postgres \
+            -e DB_PASSWORD=postgres \
+            -e DB_HOST=localhost \
+            -e DB_PORT=5432 \
+            -e DB_NAME=test_db \
+            my-app \
+            pytest -v
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t my-app .
+      - name: Save Docker image
+        run: docker save my-app -o image.tar
+      - name: Copy image to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          source: image.tar
+          target: /tmp/image.tar
+      - name: Load and run on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            docker load -i /tmp/image.tar
+            docker stop my-app || true
+            docker rm my-app || true
+            docker run -d --name my-app \
+              -e APP_PORT=${{ secrets.APP_PORT }} \
+              -e DB_USER=${{ secrets.DB_USER }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e DB_HOST=${{ secrets.DB_HOST }} \
+              -e DB_PORT=${{ secrets.DB_PORT }} \
+              -e DB_NAME=${{ secrets.DB_NAME }} \
+              -p ${{ secrets.APP_HOST_PORT }}:${{ secrets.APP_PORT }} \
+              my-app
