@@ -2,14 +2,14 @@ services:
   app:
     build: .
     ports:
-      - "8000:8000"
+      - "60080:8000"  # Используйте порт из задания
     environment:
       DB_HOST: postgres
       DB_USER: kubsu
       DB_PASSWORD: kubsu
-      DB_PORT: 5432
       DB_NAME: kubsu
-    depends_on:
+      DB_PORT: 5432
+    depends_on:      
       postgres:
         condition: service_healthy
 
