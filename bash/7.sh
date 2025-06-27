@@ -8,6 +8,6 @@ for p in "${paths[@]}"; do
     count=$(find "$p" -maxdepth 1 -type f 2>/dev/null | wc -l)
     echo "$p => $count"
   else
-    echo "$p => not a directory"
+    echo "$p => 0"
   fi
 done 
