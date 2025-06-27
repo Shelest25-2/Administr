@@ -7,7 +7,5 @@ for p in "${paths[@]}"; do
   if [ -d "$p" ]; then
     count=$(find "$p" -maxdepth 1 -type f 2>/dev/null | wc -l)
     echo "$p => $count"
-  else
-    echo "$p => 0"
   fi
-done 
+done
