@@ -1,26 +1,21 @@
-#!/bin/sh
+#!/bin/bash
+# Скрипт: 6.sh
+# Использование: ./6.sh <filename>
 
 if [ "$FOO" = "5" ] && [ "$BAR" = "1" ]; then
-    echo "Ошибка: Выполнение скрипта запрещено"
-    exit 1
+  echo "Error: script execution is forbidden when FOO=5 and BAR=1"
+  exit 1
 fi
 
-# Сохраняем список файлов в файл
-ls -1 > initial_files.txt
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <filename>"
+  exit 1
+fi
 
-echo "Ожидаю появления нового файла..."
-echo "Для выхода нажмите Ctrl+C"
+filename="$1"
 
-while true; do
-    for file in *; do
-        # Пропускаем каталоги
-        [ -d "$file" ] && continue
-        
-        # Проверяем, есть ли файл в исходном списке
-        if ! grep -qFx "$file" initial_files.txt; then
-            echo "Обнаружен новый файл: $file"
-            exit 0
-        fi
-    done
-    sleep 1
+while [ ! -f "$filename" ]; do
+  sleep 1
 done
+
+echo "File $filename appeared!" 

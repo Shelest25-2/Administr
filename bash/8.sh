@@ -1,19 +1,22 @@
 #!/bin/bash
+# Скрипт: 8.sh
+# Использование: ./8.sh
 
-# Собираем все уникальные значения LC_* переменных
-unique_values=$(env | grep '^LC_' | awk -F= '{print $2}' | sort -u)
+values=()
+while IFS='=' read -r name value; do
+  if [[ $name == LC_* ]]; then
+    values+=("$value")
+  fi
+done < <(env)
 
-# Подсчитываем количество уникальных значений
-count=$(echo "$unique_values" | wc -l)
-
-# Если найдено более одного уникального значения
-if [ "$count" -gt 1 ]; then
-    echo "ОШИБКА: Переменные локализации имеют разные значения:"
-    env | grep '^LC_'
-    exit 1
-elif [ "$count" -eq 0 ]; then
-    echo "Предупреждение: Не найдено переменных локализации LC_*"
-else
-    echo "Все переменные локализации LC_* имеют одинаковое значение:"
-    env | grep '^LC_' | head -n1
+if [ ${#values[@]} -le 1 ]; then
+  exit 0
 fi
+
+first="${values[0]}"
+for v in "${values[@]}"; do
+  if [ "$v" != "$first" ]; then
+    echo "Error: LC_* variables have different values"
+    exit 1
+  fi
+done 

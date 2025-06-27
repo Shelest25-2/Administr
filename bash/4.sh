@@ -1,25 +1,21 @@
 #!/bin/bash
+# Скрипт: 4.sh
+# Использование: ./4.sh <planet>
 
-# Проверка количества аргументов
 if [ $# -ne 1 ]; then
-    echo "Исользование: $0 <название_планеты>"
-    exit 1
+  echo "Usage: $0 <planet>"
+  exit 1
 fi
 
-# Список планет и их спутников
-case "$1" in
-    "Меркурий") moons=0 ;;
-    "Венера")   moons=0 ;;
-    "Земля")    moons=1 ;;
-    "Марс")     moons=2 ;;
-    "Юпитер")   moons=79 ;;
-    "Сатурн")   moons=83 ;;
-    "Уран")     moons=27 ;;
-    "Нептун")   moons=14 ;;
-    *)
-        echo "Ошибка: Планета '$1' не существует или не является планетой Солнечной системы"
-        exit 1
-        ;;
-esac
-
-echo "Количество спутников: $moons"
+planet=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+case "$planet" in
+  mercury) echo 0 ;;
+  venus) echo 0 ;;
+  earth) echo 1 ;;
+  mars) echo 2 ;;
+  jupiter) echo 95 ;;
+  saturn) echo 146 ;;
+  uranus) echo 28 ;;
+  neptune) echo 16 ;;
+  *) echo "Error: no such planet" ; exit 1 ;;
+esac 
