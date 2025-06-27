@@ -3,12 +3,8 @@ name: Docker CI/CD
 on:
   push:
     branches: [ main, test-friendly ]
-    paths:
-      - 'docker/**'
   pull_request:
     branches: [ main ]
-    paths:
-      - 'docker/**'
 
 jobs:
   test:
