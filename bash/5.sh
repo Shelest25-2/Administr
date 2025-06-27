@@ -8,5 +8,5 @@ outfile="logs.log"
 for file in /var/log/*.log; do
   [ -f "$file" ] || continue
   lastline=$(tail -n 1 "$file")
-  echo "$file: $lastline" >> "$outfile"
+  echo "$lastline" >> "$outfile"
 done 

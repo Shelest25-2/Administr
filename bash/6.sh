@@ -7,12 +7,7 @@ if [ "$FOO" = "5" ] && [ "$BAR" = "1" ]; then
   exit 1
 fi
 
-if [ $# -ne 1 ]; then
-  echo "Usage: $0 <filename>"
-  exit 1
-fi
-
-filename="$1"
+filename="${1:-fix.txt}"
 
 while [ ! -f "$filename" ]; do
   sleep 1
