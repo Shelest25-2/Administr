@@ -82,11 +82,17 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y sshpass
         
+        # Test connection first
+        echo "Testing connection to server..."
+        sshpass -p '22f4d41e' ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -p 58529 nadella@kubsu.tyvik.ru "echo 'Connection successful'"
+        
         # Copy files to server
-        sshpass -p '22f4d41e' scp -o StrictHostKeyChecking=no -P 58529 -r docker/ nadella@kubsu.tyvik.ru:~/
+        echo "Copying files to server..."
+        sshpass -p '22f4d41e' scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 -P 58529 -r docker/ nadella@kubsu.tyvik.ru:~/
         
         # Deploy on server
-        sshpass -p '22f4d41e' ssh -o StrictHostKeyChecking=no -p 58529 nadella@kubsu.tyvik.ru << 'EOF'
+        echo "Deploying on server..."
+        sshpass -p '22f4d41e' ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -p 58529 nadella@kubsu.tyvik.ru << 'EOF'
           cd ~/docker
           docker compose down || true
           docker compose up -d --build
