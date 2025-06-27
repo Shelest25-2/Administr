@@ -10,7 +10,7 @@ fi
 dir="$1"
 if [ ! -d "$dir" ]; then
   echo "Error: path does not exist"
-  exit 1
+  exit 256
 fi
 
 for sub in "$dir"/*/; do

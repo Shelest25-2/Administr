@@ -13,9 +13,9 @@ case "$planet" in
   venus) echo 0 ;;
   earth) echo 1 ;;
   mars) echo 2 ;;
-  jupiter) echo 95 ;;
-  saturn) echo 146 ;;
-  uranus) echo 28 ;;
-  neptune) echo 16 ;;
-  *) echo "Error: no such planet" ; exit 1 ;;
+  jupiter) echo 98 ;;
+  saturn) echo 83 ;;
+  uranus) echo 27 ;;
+  neptune) echo 14 ;;
+  *) echo "Unknown planet" ; exit 1 ;;
 esac 

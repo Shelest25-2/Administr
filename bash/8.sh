@@ -17,6 +17,6 @@ first="${values[0]}"
 for v in "${values[@]}"; do
   if [ "$v" != "$first" ]; then
     echo "Error: LC_* variables have different values"
-    exit 1
+    exit 256
   fi
 done 

@@ -9,9 +9,9 @@ fi
 
 for file in "$@"; do
   if [ ! -f "$file" ]; then
-    echo "Error: $file does not exist"
+    echo "$file => not found"
     continue
   fi
   count=$(wc -l < "$file")
-  echo "$file: $count"
+  echo "$file => $count"
 done 
