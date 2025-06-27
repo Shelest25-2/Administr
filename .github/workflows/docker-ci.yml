@@ -1,0 +1,98 @@
+name: Docker CI/CD
+
+on:
+  push:
+    branches: [ main, test-friendly ]
+    paths:
+      - 'docker/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docker/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: kubsu
+          POSTGRES_USER: kubsu
+          POSTGRES_PASSWORD: kubsu
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      working-directory: ./docker
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -e ".[test]"
+    
+    - name: Run tests
+      working-directory: ./docker
+      env:
+        DATABASE_URL: postgresql+psycopg://kubsu:kubsu@localhost:5432/kubsu
+      run: |
+        pytest tests/ -v
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      working-directory: ./docker
+      run: |
+        docker build -t myapp:${{ github.sha }} .
+        docker build -t myapp:latest .
+    
+    - name: Check image size
+      run: |
+        docker images myapp --format "table {{.Tag}}\t{{.Size}}"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to server
+      run: |
+        # Install sshpass for password authentication
+        sudo apt-get update
+        sudo apt-get install -y sshpass
+        
+        # Copy files to server
+        sshpass -p '22f4d41e' scp -o StrictHostKeyChecking=no -P 58529 -r docker/ nadella@kubsu.tyvik.ru:~/
+        
+        # Deploy on server
+        sshpass -p '22f4d41e' ssh -o StrictHostKeyChecking=no -p 58529 nadella@kubsu.tyvik.ru << 'EOF'
+          cd ~/docker
+          docker compose down || true
+          docker compose up -d --build
+          echo "Deployment completed successfully!"
+        EOF 
