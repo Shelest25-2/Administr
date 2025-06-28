@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:15
+    image: docker.io/library/postgres:15
     environment:
       POSTGRES_DB: kubsu
       POSTGRES_USER: kubsu
