@@ -1,37 +1,35 @@
-# Stage 1: Build stage
+# 2-stage build без gcc
 FROM python:3.11-slim as builder
 
 WORKDIR /app
 
-# Install build dependencies
+# Установить только необходимые build зависимости
 RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Copy dependency files
+# Копировать и установить зависимости
 COPY pyproject.toml .
+RUN pip install --no-cache-dir --only-binary=all .
 
-# Install dependencies
-RUN pip install --no-cache-dir --user .
-
-# Stage 2: Runtime stage
+# Финальный образ
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install runtime dependencies
+# Установить только runtime зависимости
 RUN apt-get update && apt-get install -y \
     libpq5 \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Copy Python packages from builder stage
-COPY --from=builder /root/.local /root/.local
+# Копировать установленные пакеты
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy application code
+# Копировать только необходимые файлы приложения
 COPY src/ ./src/
-
-# Make sure scripts in .local are usable
-ENV PATH=/root/.local/bin:$PATH
 
 # Expose port
 EXPOSE 8090
